@@ -4,7 +4,7 @@
 typedef enum TokenType {
 	TOKEN_INT, //123
 	TOKEN_STRING, //"hello", 'hello'
-	TOKEN_ASSIGNMENT, // =
+	TOKEN_ASSINGMENT, // =
 	TOKEN_LPARANTHES, // (
 	TOKEN_RPARANTHES, // )
 	TOKEN_OPERATOR, // * + -

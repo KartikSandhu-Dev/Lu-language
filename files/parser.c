@@ -1,6 +1,7 @@
 #include "../header/parser.h"
 #include "../header/lexer.h"
 #include <string.h>
+#include <stdio.h>
 
 // returns ptr to current element of parser
 Token *current(Parser *p) {
@@ -12,15 +13,21 @@ void advance(Parser *p) {
 	p->pos++;
 }
 
-// go back to the previous element
-void previous(Parser *p) {
-	p->pos--;
+// harcore expect
+static void expect(Parser *p, TokenType type) {
+	if(current(p)->type != type) {
+		fprintf(stderr, "Unexpected Token\n");
+		exit(1);
+	}
+
+	advance(p);
 }
 
-void parse_program(Parser *p) {
+ASTNode *parse_program(Parser *p) {
 	while(current(p)->type != TOKEN_EOF) {
 		parse_statement(p);
 	}
+	return NULL;
 }
 
 ASTNode *parse_statement(Parser *p) {
@@ -36,47 +43,39 @@ ASTNode *parse_statement(Parser *p) {
 
 ASTNode *parse_assignment(Parser *p) {
 	if(current(p)->type == TOKEN_IDENTIFIER) {
+		ASTNode *id = malloc(sizeof(ASTNode));
+		id->type = NODE_IDENTIFIER;
+		id->value = current(p)->value;
+
+
+		expect(p, TOKEN_ASSINGMENT);
+
+		ASTNode *node = malloc(sizeof(ASTNode));
+		node->type = NODE_ASSINGMENT;
+		node->value = current(p)->value;
+
 		advance(p);
-		if(current(p)->type == TOKEN_OPERATOR && (strcmp(current(p)->value, "=") == 0)) {	
-			ASTNode *node = malloc(sizeof(ASTNode));
-			node->type = NODE_ASSINGMENT;
-			node->value = current(p)->value;
 
-			previous(p); //before the operator
+		ASTNode *expr = parse_expression(p);
 
-			ASTNode *id = malloc(sizeof(ASTNode));
-			id->type = NODE_IDENTIFIER;
-
-			ASTNode *expr = malloc(sizeof(ASTNode));
-			
-			while(current(p)->type != TOKEN_EOL) {
-				if(current(p)->type == TOKEN_IDENTIFIER) {
-					id->value = current(p)->value;
-
-				} else if(current(p)->type == TOKEN_STRING) {
-					expr->value = current(p)->value;
-					expr->type = NODE_STRING;
-
-				} else if(current(p)->type == TOKEN_INT) {
-					
-				}
-
-
-				advance(p);
-			}
-
-			node->assignment.target = id;
-			node->assignment.value = expr;
-
-		} else {
-			exit(1);
+		if(expr == NULL) {
+			fprintf(stderr, "Expected expression after '='\n");
+ 			exit(1);
 		}
+
+		node->assignment.target = id;
+		node->assignment.value = expr;
+
+		return node;
+
 	}	
 	return NULL;
 }
 
 ASTNode *parse_expression(Parser *p) {
-	if(current(p)->type == TOKEN_INT || (strcmp(current(p)->value, "("))) {
+	ASTNode *node = malloc(sizeof(ASTNode));
+
+	if(current(p)->type == TOKEN_LPARANTHES) {
 		advance(p);
 		if(current(p)->type == TOKEN_OPERATOR) {
 			if(strcmp(current(p)->value, "+")) {
@@ -87,7 +86,14 @@ ASTNode *parse_expression(Parser *p) {
 		ASTNode *node = malloc(sizeof(ASTNode));
 
 		return node;
+	} else if(current(p)->type == TOKEN_INT) {
+
+	} else if(current(p)->type == TOKEN_IDENTIFIER) {
+
 	}
+
+	if(node == NULL) { free(node); }
+
 	return NULL;
 }
 
@@ -99,7 +105,18 @@ ASTNode *parse_print(Parser *p) {
 
 		   	ASTNode *node = malloc(sizeof(ASTNode));
 			node->type = NODE_PRINT;
+			node->value = current(p)->value;
 
+			ASTNode *expr = parse_expression(p);
+
+			if(expr == NULL) {
+				fprintf(stderr, "Nothing to print\n");
+				exit(1);
+			}
+
+			node->print.expr = expr;
+
+			return node;
 		}
 	}
 	return NULL;

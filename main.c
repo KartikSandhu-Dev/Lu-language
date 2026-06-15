@@ -19,7 +19,7 @@ char *read_whole_file(char *name) {
 	file = fopen(name, "r");
 
 	if(!file) {
-		printf("File is empty");
+		fprintf(stderr, "FILE IS EMPTY\n");
 		exit(1);
 	}
 

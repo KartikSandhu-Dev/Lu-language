@@ -80,7 +80,7 @@ static char **split(char *buffer) {
 
 	while (1) {
 		if(stackpos >= 256) {
-			fprintf(stderr, "BUFFER OVERFLOW");
+			fprintf(stderr, "BUFFER OVERFLOW\n");
 			exit(1);
 		}
 
@@ -180,7 +180,7 @@ Token *tokenize(char *buffer) {
 			tok.type = TOKEN_SOC;
 
 		} else if(input[pos][0] == '=') {
-			tok.type = TOKEN_ASSIGNMENT;
+			tok.type = TOKEN_ASSINGMENT;
 
 		} else if(input[pos][0] == '(') {
 			tok.type = TOKEN_LPARANTHES;
@@ -201,7 +201,7 @@ Token *tokenize(char *buffer) {
 			tok.type = TOKEN_IDENTIFIER;
 
 		} else {
-			fprintf(stderr, "ERROR OCCURED\n");
+			fprintf(stderr, "TOKEN NOT RECOGNISED, ERROR OCCURED\n");
 			exit(1);
 		}
 
@@ -260,8 +260,8 @@ void display_tokens(Token *tokens) {
 		} else if(tok.type == TOKEN_STRING) {
 			printf("STRING: %s\n", tokens[pos].value);
 
-		} else if(tok.type == TOKEN_ASSIGNMENT) {
-			printf("ASSIGNMENT: %s\n", tokens[pos].value);
+		} else if(tok.type == TOKEN_ASSINGMENT) {
+			printf("ASSINGMENT: %s\n", tokens[pos].value);
 			
 		} else if(tok.type == TOKEN_LPARANTHES) {
 			printf("LPARANTHES: %s\n", tokens[pos].value);
