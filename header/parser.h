@@ -46,7 +46,8 @@ typedef struct ASTNode {
 	union {
 		struct {
 			ASTNode **statements;
-			size_t size;
+			size_t capacity;
+			size_t count;
 		} program;
 
 		struct {

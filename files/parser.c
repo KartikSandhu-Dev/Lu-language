@@ -1,7 +1,10 @@
 #include "../header/parser.h"
 #include "../header/lexer.h"
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+ASTNode *program_node;
 
 // returns ptr to current element of parser
 Token *current(Parser *p) {
@@ -19,14 +22,33 @@ static void expect(Parser *p, TokenType type) {
 		fprintf(stderr, "Unexpected Token\n");
 		exit(1);
 	}
-
 	advance(p);
 }
 
+// PARENT NODE
 ASTNode *parse_program(Parser *p) {
+	ASTNode *progNode = malloc(sizeof(ASTNode));
+	progNode->program.capacity = num_of_tokens();
+	progNode->program.count = 0;
+
+	progNode->program.statements = malloc(sizeof(ASTNode)*progNode->program.capacity);
+
 	while(current(p)->type != TOKEN_EOF) {
-		parse_statement(p);
+		progNode->program.statements[progNode->program.count] = parse_statement(p);
+
+		progNode->program.count++;
+
+		if(progNode->program.count >= progNode->program.capacity) {
+			progNode->program.statements = realloc(progNode->program.statements, progNode->program.count + 10);
+		}
 	}
+
+	if(progNode == NULL) { free(progNode); }
+	else {
+		program_node = progNode;
+		return progNode;
+	}
+
 	return NULL;
 }
 
@@ -52,7 +74,7 @@ ASTNode *parse_assignment(Parser *p) {
 
 		ASTNode *node = malloc(sizeof(ASTNode));
 		node->type = NODE_ASSINGMENT;
-		node->value = current(p)->value;
+		node->value = NULL;
 
 		advance(p);
 
@@ -105,7 +127,7 @@ ASTNode *parse_print(Parser *p) {
 
 		   	ASTNode *node = malloc(sizeof(ASTNode));
 			node->type = NODE_PRINT;
-			node->value = current(p)->value;
+			node->value = NULL;
 
 			ASTNode *expr = parse_expression(p);
 

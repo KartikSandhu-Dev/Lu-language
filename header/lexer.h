@@ -1,6 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <stdlib.h>
+
 typedef enum TokenType {
 	TOKEN_INT, //123
 	TOKEN_STRING, //"hello", 'hello'
@@ -24,5 +26,6 @@ typedef struct Token {
 Token *tokenize(char *buffer);
 void display_tokens(Token *tokens);
 void clean_tokens();
+size_t num_of_tokens();
 
 #endif

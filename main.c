@@ -8,7 +8,10 @@ int main() {
 	char *buffer = read_whole_file("prac.lu");
 
 	display_tokens(tokenize(buffer));
+
 	clean_tokens();
+
+	printf("Number of tokens: %zu\n", num_of_tokens());
 
 	return 0;
 }

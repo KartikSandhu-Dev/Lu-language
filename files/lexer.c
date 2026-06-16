@@ -8,6 +8,8 @@
 char **split_stream;
 Token *token_stream;
 
+size_t numOfTokens;
+
 static int is_keyword(char *buffer) {
 	return strcmp(buffer, "if") == 0 ||
            strcmp(buffer, "else") == 0 ||
@@ -163,6 +165,8 @@ Token *tokenize(char *buffer) {
 			break;
 		}
 
+		numOfTokens++;
+
 		size_t len = strlen(input[pos]);
 		tok.value = input[pos];
 		
@@ -282,4 +286,8 @@ void display_tokens(Token *tokens) {
 
 		pos++;
 	}
+}
+
+size_t num_of_tokens() {
+	return numOfTokens;
 }
