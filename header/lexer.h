@@ -9,7 +9,7 @@ typedef enum TokenType {
 	TOKEN_ASSINGMENT, // =
 	TOKEN_LPARANTHES, // (
 	TOKEN_RPARANTHES, // )
-	TOKEN_OPERATOR, // * + -
+	TOKEN_OPERATOR, // * + - /
 	TOKEN_LOGICALOP, // == > < !=
 	TOKEN_IDENTIFIER,  //abc
 	TOKEN_KEYWORD, // if else end

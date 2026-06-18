@@ -82,7 +82,7 @@ static char **split(char *buffer) {
 
 	while (1) {
 		if(stackpos >= 256) {
-			fprintf(stderr, "BUFFER OVERFLOW\n");
+			fprintf(stderr, "BUFFER OVERFLOW!\n");
 			exit(1);
 		}
 
@@ -165,8 +165,6 @@ Token *tokenize(char *buffer) {
 			break;
 		}
 
-		numOfTokens++;
-
 		size_t len = strlen(input[pos]);
 		tok.value = input[pos];
 		
@@ -200,12 +198,14 @@ Token *tokenize(char *buffer) {
 
 		} else if(is_keyword(input[pos])) {
 			tok.type = TOKEN_KEYWORD;
+			numOfTokens++;
 
 		} else if(!(is_keyword(input[pos]))) {
 			tok.type = TOKEN_IDENTIFIER;
+			numOfTokens++;
 
 		} else {
-			fprintf(stderr, "TOKEN NOT RECOGNISED, ERROR OCCURED\n");
+			fprintf(stderr, "Token not recognised, error occured.\n");
 			exit(1);
 		}
 
@@ -240,6 +240,8 @@ void clean_tokens() {
 
 	token_stream = NULL;
 	split_stream = NULL;
+
+	numOfTokens = 0;
 }
 
 void display_tokens(Token *tokens) {

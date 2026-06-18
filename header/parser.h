@@ -35,6 +35,10 @@ typedef enum NodeType {
 	NODE_STRING,
 	NODE_IDENTIFIER,
 	NODE_EXPRESSION,
+	NODE_PLUS,
+	NODE_MULTIPLY,
+	NODE_DIVIDE,
+	NODE_MINUS,
 
 	NODE_ASSINGMENT,
 	NODE_PRINT,
@@ -70,6 +74,7 @@ typedef struct ASTNode {
 
 Token *current(Parser *p);
 void advance(Parser *p);
+void previous(Parser *p);
 
 ASTNode *parse_program(Parser *p);
 ASTNode *parse_statement(Parser *p);
@@ -81,5 +86,6 @@ ASTNode *parse_if(Parser *p);
 ASTNode *parse_expression(Parser *p);
 
 void clean_ASTs();
+void display_ASTs();
 
 #endif

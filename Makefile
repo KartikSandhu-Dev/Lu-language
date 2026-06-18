@@ -12,4 +12,4 @@ main: $(OBJ)
 
 clean:
 	@rm -f $(OBJ) main
-	@echo "CLEARED"
+	@echo "CLEANED"

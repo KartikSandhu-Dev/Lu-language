@@ -9,9 +9,10 @@ int main() {
 
 	display_tokens(tokenize(buffer));
 
+	printf("Number of tokens: %zu\n", num_of_tokens());
+
 	clean_tokens();
 
-	printf("Number of tokens: %zu\n", num_of_tokens());
 
 	return 0;
 }
@@ -22,7 +23,7 @@ char *read_whole_file(char *name) {
 	file = fopen(name, "r");
 
 	if(!file) {
-		fprintf(stderr, "FILE IS EMPTY\n");
+		fprintf(stderr, "FILE IS EMPTY!\n");
 		exit(1);
 	}
 
