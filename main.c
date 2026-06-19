@@ -1,18 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "header/lexer.h"
+#include "header/parser.h"
 
 char *read_whole_file(char *name);
 
 int main() {
 	char *buffer = read_whole_file("prac.lu");
 
-	display_tokens(tokenize(buffer));
+	Token *tokens = tokenize(buffer);
 
-	printf("Number of tokens: %zu\n", num_of_tokens());
+	display_tokens(tokens);
 
+	Parser p = {tokens, 0};
+	ASTNode *tree = parse_program(&p);
+
+	print_ASTs(tree);
+
+	clean_ASTs(tree);
 	clean_tokens();
-
 
 	return 0;
 }

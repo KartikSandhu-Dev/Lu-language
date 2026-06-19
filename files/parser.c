@@ -1,11 +1,9 @@
 #include "../header/parser.h"
 #include "../header/lexer.h"
-#include <exception>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-ASTNode *program_node;
+#include <stdbool.h>
 
 // returns ptr to current element of parser
 Token *current(Parser *p) {
@@ -22,9 +20,9 @@ void previous(Parser *p) {
 }
 
 // harcore expect
-static void expect(Parser *p, TokenType type) {
+static void expect(Parser *p, TokenType type, char* errMessage) {
 	if(current(p)->type != type) {
-		fprintf(stderr, "Unexpected Token.\n");
+		fprintf(stderr, "%s\n", errMessage);
 		exit(1);
 	}
 	advance(p);
@@ -33,11 +31,12 @@ static void expect(Parser *p, TokenType type) {
 // PARENT NODE
 ASTNode *parse_program(Parser *p) {
 	ASTNode *progNode = malloc(sizeof(ASTNode));
+	progNode->type = NODE_PROGRAM;
 
 	size_t *capacity = &progNode->program.capacity;
 	size_t *count = &progNode->program.count;
 
-	*capacity = num_of_tokens();
+	*capacity = 10;
 	*count = 0;
 
 	progNode->program.statements = malloc(sizeof(ASTNode*)*(*capacity));
@@ -48,31 +47,37 @@ ASTNode *parse_program(Parser *p) {
 		(*count)++;
 
 		if(*count >= *capacity) {
-			*capacity = *count + 10;
+			*capacity*=2;
 			progNode->program.statements = 
 					realloc(progNode->program.statements, 
 						sizeof(ASTNode*)*(*capacity));
 		}
 	}
 
-	if(current(p)->type == EOF) {
+	if(current(p)->type == TOKEN_EOF) {
 		progNode->program.statements[*count] = NULL;
 	}
 
-	program_node = progNode;
 	return progNode;
 }
 
+
+
 ASTNode *parse_statement(Parser *p) {
-	if(current(p)->type == TOKEN_EOL || (current(p)->type == TOKEN_KEYWORD && 
-		(strcmp(current(p)->value, "end") == 0))){
-		advance(p);
+	ASTNode *node = parse_assignment(p);
+	if(node != NULL) {
+		expect(p, TOKEN_EOL, "Incorrect syntax no EOL used.");
+		return node;
+	}
+	
+	node = parse_print(p);
+	if(node != NULL) {
+		expect(p, TOKEN_EOL, "Incorrect syntax no EOL used.");
+		return node;
 	}
 
-	parse_assignment(p);
-	parse_print(p);
-
-	return NULL;
+	fprintf(stderr, "Unknown statement.\n");
+	exit(1);
 }
 
 ASTNode *parse_assignment(Parser *p) {
@@ -82,18 +87,13 @@ ASTNode *parse_assignment(Parser *p) {
 		id->value = current(p)->value;
 
 		advance(p);
-		expect(p, TOKEN_ASSINGMENT);
+		expect(p, TOKEN_ASSIGNMENT, "Expected assignment.");
 
 		ASTNode *node = malloc(sizeof(ASTNode));
-		node->type = NODE_ASSINGMENT;
+		node->type = NODE_ASSIGNMENT;
 		node->value = NULL;
 
 		ASTNode *expr = parse_expression(p);
-
-		if(expr == NULL) {
-			fprintf(stderr, "Expected expression after '='.\n");
- 			exit(1);
-		}
 
 		node->assignment.target = id;
 		node->assignment.value = expr;
@@ -104,162 +104,160 @@ ASTNode *parse_assignment(Parser *p) {
 	return NULL;
 }
 
-// (((5 + 5) * (2)) + (2))
+// (((5 + 5) * 2) + 2)
 // ((5+5)*(2+2))
-static ASTNode *innerExpression(Parser *p) {
-	if(current(p)->type == TOKEN_LPARANTHES) {
+ASTNode *parse_arithmetic(Parser *p) {
+	if(current(p)->type == TOKEN_INT || current(p)->type == TOKEN_IDENTIFIER) {
 		ASTNode *node = malloc(sizeof(ASTNode));
 
-		advance(p);
-
-		ASTNode *leftNode = innerExpression(p);
-
-		advance(p);
-
-		if(current(p)->type == TOKEN_INT || current(p)->type == TOKEN_IDENTIFIER) {
-			leftNode->value = current(p)->value;
-		} else {
-			fprintf(stderr, "Error occured in expression, used something unidentified.\n");
+		if(current(p)->type == TOKEN_INT){
+			node->type = NODE_INT;
+		} else if(current(p)->type == TOKEN_IDENTIFIER) {
+			node->type = NODE_IDENTIFIER;
 		}
 
-		expect(p, TOKEN_OPERATOR);
-
-		if(strcmp(current(p)->value, "+") == 0) {
-			node->type = NODE_PLUS;
-		} else if(strcmp(current(p)->value, "-") == 0) {
-			node->type = NODE_MINUS;
-		} else if(strcmp(current(p)->value, "*") == 0) {
-			node->type = NODE_MULTIPLY;
-		} else if(strcmp(current(p)->value, "/") == 0) {
-			node->type = NODE_DIVIDE;
-		} 
-
-		if(current(p)->type == TOKEN_RPARANTHES) {
-			return node;
-		}
-
-		ASTNode *rightNode = innerExpression(p);
-
+		node->value = current(p)->value;
 		advance(p);
-
-		if(current(p)->type == TOKEN_INT || current(p)->type == TOKEN_IDENTIFIER) {
-			rightNode->value = current(p)->value;
-		} else {
-			fprintf(stderr, "Error occured in expression, used something unidentified.\n");
-		}
-
-		expect(p, TOKEN_RPARANTHES);
-
 		return node;
 
-
 	}
-	return NULL;
-}
 
-ASTNode *parse_expression(Parser *p) {
+	expect(p, TOKEN_LPARANTHES, "Expected '(' in the expression.");
+
+	ASTNode *left = parse_arithmetic(p);
+
 	ASTNode *node = malloc(sizeof(ASTNode));
 
-	if(current(p)->type == TOKEN_LPARANTHES) {
-		node->type = NODE_EXPRESSION;
-
-		while(current(p)->type != TOKEN_EOL) {
-			if(current(p)->type == TOKEN_LPARANTHES) {
-				ASTNode *innerNode = malloc(sizeof(ASTNode));
-
-				advance(p);
-				innerNode->value = current(p)->value;
-				expect(p, TOKEN_INT);
-
-				if(current(p)->type == TOKEN_OPERATOR) {
-					if(strcmp(current(p)->value, "+") == 0) {
-						
-					} else if(strcmp(current(p)->value, "-") == 0) {
-						continue;
-					} else if(strcmp(current(p)->value, "*") == 0) {
-						continue;
-					} else if(strcmp(current(p)->value, "/") == 0) {
-						continue;
-					} else {
-						fprintf(stderr, "Unidentified operator used in the expression.\n");
-					}
-				}
-
-			}
-			if(current(p)->type == TOKEN_RPARANTHES) {
-				break;
-			}
-
-			advance(p);
-		}
-
-	} else if(current(p)->type == TOKEN_STRING) {
-		node->type = NODE_STRING;
-		node->value = current(p)->value;
-
-	} else if(current(p)->type == TOKEN_INT) {
-		node->type = NODE_INT;
-		node->value = current(p)->value;
-
-	} else if(current(p)->type == TOKEN_IDENTIFIER) {
-		node->type = NODE_IDENTIFIER;
-		node->value = current(p)->value;
-
+	switch(current(p)->value[0]) {
+		case '+': node->type = NODE_PLUS; break;
+		case '-': node->type = NODE_MINUS; break;
+		case '*': node->type = NODE_MULTIPLY; break;
+		case '/': node->type = NODE_DIVIDE; break;
+		default:
+			fprintf(stderr, "Unexpected behaviour.\n");
+			exit(1);
 	}
+
+	expect(p, TOKEN_OPERATOR, "Expected an operator in the expression.");
+
+	ASTNode *right = parse_arithmetic(p);
+
+	expect(p, TOKEN_RPARANTHES, "Expected ')' in the expression.");
+
+	node->expression.left = left;
+	node->expression.right = right;
 
 	return node;
 }
 
+ASTNode *parse_expression(Parser *p) {
+	if(current(p)->type == TOKEN_STRING) {
+	    ASTNode *node = malloc(sizeof(ASTNode));
+	    node->type = NODE_STRING;
+	    node->value = current(p)->value;
+	    advance(p);
+	    return node;
+	}
+
+	if(current(p)->type == TOKEN_INT ||
+	    current(p)->type == TOKEN_IDENTIFIER ||
+	    current(p)->type == TOKEN_LPARANTHES) {
+	    return parse_arithmetic(p);
+	}
+
+	fprintf(stderr, "Expected expression.\n");
+	exit(1);
+}
+
 ASTNode *parse_print(Parser *p) {
-	if(current(p)->type == TOKEN_KEYWORD) {
+	if(current(p)->type == TOKEN_KEYWORD && (strcmp(current(p)->value, "print") == 0)) {
 		advance(p);
-		if(current(p)->type == TOKEN_IDENTIFIER || current(p)->type == TOKEN_STRING || 
-		   current(p)->type == TOKEN_INT) {
 
-		   	ASTNode *node = malloc(sizeof(ASTNode));
-			node->type = NODE_PRINT;
-			node->value = NULL;
+	   	ASTNode *node = malloc(sizeof(ASTNode));
+		node->type = NODE_PRINT;
+		node->value = NULL;
 
-			ASTNode *expr = parse_expression(p);
+		ASTNode *expr = parse_expression(p);
 
-			if(expr == NULL) {
-				fprintf(stderr, "Nothing to print.\n");
-				exit(1);
-			}
+		node->print.expr = expr;
 
-			node->print.expr = expr;
-
-			return node;
-		}
+		return node;
+		
 	}
 	return NULL;
 }
 
-void clean_ASTs() {
-	size_t pos = 0;
-	while(program_node->program.statements[pos] != NULL) {
+void clean_ASTs(ASTNode *node) {
+	if(node->type == NODE_PROGRAM) {
+		size_t pos = 0;
+		while(node->program.statements[pos] != NULL) {
+			clean_ASTs(node->program.statements[pos]);
+			pos++;
+		}
+		free(node->program.statements);
+		free(node);
 
-		pos++;
+	} else if(node->type == NODE_ASSIGNMENT) {
+  		clean_ASTs(node->assignment.target);
+ 	  	clean_ASTs(node->assignment.value);
+ 	  	free(node);
+
+	} else if(node->type == NODE_PRINT) {
+		clean_ASTs(node->print.expr);
+		free(node);
+
+	} else if(node->type == NODE_PLUS || node->type == NODE_MINUS ||
+		node->type == NODE_MULTIPLY || node->type == NODE_DIVIDE) {
+  	  	clean_ASTs(node->expression.left);
+   		clean_ASTs(node->expression.right);
+   		free(node);
+
+	} else if(node->type == NODE_INT) {
+		free(node);
+
+	} else if(node->type == NODE_STRING) {
+		free(node);
+
+	} else if(node->type == NODE_IDENTIFIER) {
+		free(node);
+
 	}
-
-	free(program_node->program.statements);
-	free(program_node);
 }
 
-void display_ASTs() {
-	size_t pos = 0;
-	printf("Program\n");
-
-	while(program_node->program.statements[pos] != NULL) {
-		ASTNode *statement = program_node->program.statements[pos];
-
-		if(statement->type == NODE_ASSINGMENT) {
-			ASTNode *target = statement->assignment.target;
-			ASTNode *value = statement->assignment.value;
-
-			printf("target: %s, value: %s", target->value, NULL);
+void print_ASTs(ASTNode *node) {
+	if(node->type == NODE_PROGRAM) {
+		printf("Program\n");
+		size_t pos = 0;
+		while(node->program.statements[pos] != NULL) {
+			print_ASTs(node->program.statements[pos]);
+			pos++;
 		}
-		pos++;
+
+	} else if(node->type == NODE_ASSIGNMENT) {
+  	  printf("Assignment\n");
+
+  	  print_ASTs(node->assignment.target);
+ 	  print_ASTs(node->assignment.value);
+
+	} else if(node->type == NODE_PRINT) {
+		printf("Print\n");
+
+		print_ASTs(node->print.expr);
+	} else if(node->type == NODE_PLUS) {
+   		printf("Plus\n");
+
+  	  	print_ASTs(node->expression.left);
+   		print_ASTs(node->expression.right);
+
+	} else if(node->type == NODE_INT) {
+		printf("%s\n", node->value);
+
+	} else if(node->type == NODE_STRING) {
+		printf("%s\n", node->value);
+
+	} else if(node->type == NODE_IDENTIFIER) {
+		printf("%s\n", node->value);
+
 	}
 
 }

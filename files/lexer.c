@@ -8,8 +8,6 @@
 char **split_stream;
 Token *token_stream;
 
-size_t numOfTokens;
-
 static int is_keyword(char *buffer) {
 	return strcmp(buffer, "if") == 0 ||
            strcmp(buffer, "else") == 0 ||
@@ -182,7 +180,7 @@ Token *tokenize(char *buffer) {
 			tok.type = TOKEN_SOC;
 
 		} else if(input[pos][0] == '=') {
-			tok.type = TOKEN_ASSINGMENT;
+			tok.type = TOKEN_ASSIGNMENT;
 
 		} else if(input[pos][0] == '(') {
 			tok.type = TOKEN_LPARANTHES;
@@ -198,11 +196,9 @@ Token *tokenize(char *buffer) {
 
 		} else if(is_keyword(input[pos])) {
 			tok.type = TOKEN_KEYWORD;
-			numOfTokens++;
 
 		} else if(!(is_keyword(input[pos]))) {
 			tok.type = TOKEN_IDENTIFIER;
-			numOfTokens++;
 
 		} else {
 			fprintf(stderr, "Token not recognised, error occured.\n");
@@ -240,8 +236,6 @@ void clean_tokens() {
 
 	token_stream = NULL;
 	split_stream = NULL;
-
-	numOfTokens = 0;
 }
 
 void display_tokens(Token *tokens) {
@@ -266,7 +260,7 @@ void display_tokens(Token *tokens) {
 		} else if(tok.type == TOKEN_STRING) {
 			printf("STRING: %s\n", tokens[pos].value);
 
-		} else if(tok.type == TOKEN_ASSINGMENT) {
+		} else if(tok.type == TOKEN_ASSIGNMENT) {
 			printf("ASSINGMENT: %s\n", tokens[pos].value);
 			
 		} else if(tok.type == TOKEN_LPARANTHES) {
@@ -288,8 +282,4 @@ void display_tokens(Token *tokens) {
 
 		pos++;
 	}
-}
-
-size_t num_of_tokens() {
-	return numOfTokens;
 }

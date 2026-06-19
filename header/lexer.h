@@ -6,7 +6,7 @@
 typedef enum TokenType {
 	TOKEN_INT, //123
 	TOKEN_STRING, //"hello", 'hello'
-	TOKEN_ASSINGMENT, // =
+	TOKEN_ASSIGNMENT, // =
 	TOKEN_LPARANTHES, // (
 	TOKEN_RPARANTHES, // )
 	TOKEN_OPERATOR, // * + - /
@@ -26,6 +26,5 @@ typedef struct Token {
 Token *tokenize(char *buffer);
 void display_tokens(Token *tokens);
 void clean_tokens();
-size_t num_of_tokens();
 
 #endif

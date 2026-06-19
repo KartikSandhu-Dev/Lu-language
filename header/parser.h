@@ -31,16 +31,18 @@ typedef struct Parser {
 } Parser;
 
 typedef enum NodeType {
+	NODE_PROGRAM,
+
 	NODE_INT,
 	NODE_STRING,
 	NODE_IDENTIFIER,
-	NODE_EXPRESSION,
+
 	NODE_PLUS,
 	NODE_MULTIPLY,
 	NODE_DIVIDE,
 	NODE_MINUS,
 
-	NODE_ASSINGMENT,
+	NODE_ASSIGNMENT,
 	NODE_PRINT,
 } NodeType;
 
@@ -82,10 +84,11 @@ ASTNode *parse_statement(Parser *p);
 ASTNode *parse_assignment(Parser *p);
 ASTNode *parse_print(Parser *p);
 
-ASTNode *parse_if(Parser *p);
+ASTNode *parse_ifelse(Parser *p);
 ASTNode *parse_expression(Parser *p);
+ASTNode *parse_arithmetic(Parser *p);
 
-void clean_ASTs();
-void display_ASTs();
+void clean_ASTs(ASTNode *node);
+void print_ASTs(ASTNode *node);
 
 #endif
