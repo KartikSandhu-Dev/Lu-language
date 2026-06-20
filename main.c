@@ -10,12 +10,14 @@ int main() {
 
 	Token *tokens = tokenize(buffer);
 
+		printf("----------TOKENS--------------\n");
 	display_tokens(tokens);
 
 	Parser p = {tokens, 0};
 	ASTNode *tree = parse_program(&p);
 
-	print_ASTs(tree);
+	printf("----------TREE--------------\n");
+	print_ASTs(tree, 0, true);
 
 	clean_ASTs(tree);
 	clean_tokens();

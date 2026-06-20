@@ -15,10 +15,6 @@ void advance(Parser *p) {
 	p->pos++;
 }
 
-void previous(Parser *p) {
-	p->pos--;
-}
-
 // harcore expect
 static void expect(Parser *p, TokenType type, char* errMessage) {
 	if(current(p)->type != type) {
@@ -42,9 +38,12 @@ ASTNode *parse_program(Parser *p) {
 	progNode->program.statements = malloc(sizeof(ASTNode*)*(*capacity));
 
 	while(current(p)->type != TOKEN_EOF) {
-		progNode->program.statements[*count] = parse_statement(p);
-		
-		(*count)++;
+		ASTNode *node = parse_statement(p);
+
+		if(node != NULL) {
+			progNode->program.statements[*count] = node;
+			(*count)++;
+		}
 
 		if(*count >= *capacity) {
 			*capacity*=2;
@@ -74,6 +73,11 @@ ASTNode *parse_statement(Parser *p) {
 	if(node != NULL) {
 		expect(p, TOKEN_EOL, "Incorrect syntax no EOL used.");
 		return node;
+	}
+
+	if(current(p)->type == TOKEN_EOL) {
+		advance(p);
+		return NULL;
 	}
 
 	fprintf(stderr, "Unknown statement.\n");
@@ -224,31 +228,72 @@ void clean_ASTs(ASTNode *node) {
 	}
 }
 
-void print_ASTs(ASTNode *node) {
+static bool last_level[256];
+static void print_indent(int indent) {
+    for(int i = 0; i < indent; i++) {
+        if(last_level[i]) {
+        	printf("    ");
+        } else {
+        	printf("│   ");
+        }
+    }
+}
+
+void print_ASTs(ASTNode *node, int indent, bool isLast) {
+	if(!node) { return ;}
+
+	last_level[indent] = isLast;
+	print_indent(indent);
+
+	if(node->type != NODE_PROGRAM) {
+		if(isLast) { printf("└──"); }
+		else { printf("├──"); }
+	}
+
 	if(node->type == NODE_PROGRAM) {
 		printf("Program\n");
 		size_t pos = 0;
 		while(node->program.statements[pos] != NULL) {
-			print_ASTs(node->program.statements[pos]);
+			if(node->program.statements[pos+1] == NULL) {
+				print_ASTs(node->program.statements[pos], indent, true);
+				break;
+			}
+			print_ASTs(node->program.statements[pos], indent, false);
 			pos++;
 		}
 
 	} else if(node->type == NODE_ASSIGNMENT) {
   	  printf("Assignment\n");
 
-  	  print_ASTs(node->assignment.target);
- 	  print_ASTs(node->assignment.value);
+  	  print_ASTs(node->assignment.target, indent+1, false);
+ 	  print_ASTs(node->assignment.value, indent+1, true);
 
 	} else if(node->type == NODE_PRINT) {
 		printf("Print\n");
 
-		print_ASTs(node->print.expr);
+		print_ASTs(node->print.expr, indent+1, true);
 	} else if(node->type == NODE_PLUS) {
    		printf("Plus\n");
 
-  	  	print_ASTs(node->expression.left);
-   		print_ASTs(node->expression.right);
+  	  	print_ASTs(node->expression.left, indent+1, false);
+   		print_ASTs(node->expression.right, indent+1, true);
+	} else if(node->type == NODE_MINUS) {
+   		printf("Minus\n");
 
+  	  	print_ASTs(node->expression.left, indent+1, false);
+   		print_ASTs(node->expression.right, indent+1, true);
+
+	} else if(node->type == NODE_MULTIPLY) {
+   		printf("Multiply\n");
+
+  	  	print_ASTs(node->expression.left, indent+1, false);
+   		print_ASTs(node->expression.right, indent+1, true);
+
+	} else if(node->type == NODE_DIVIDE) {
+   		printf("Divide\n");
+
+  	  	print_ASTs(node->expression.left, indent+1, false);
+   		print_ASTs(node->expression.right, indent+1, true);
 	} else if(node->type == NODE_INT) {
 		printf("%s\n", node->value);
 

@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 /* TREE STRUCTURE
 Program
@@ -89,6 +90,6 @@ ASTNode *parse_expression(Parser *p);
 ASTNode *parse_arithmetic(Parser *p);
 
 void clean_ASTs(ASTNode *node);
-void print_ASTs(ASTNode *node);
+void print_ASTs(ASTNode *node, int indent, bool isLast);
 
 #endif
