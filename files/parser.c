@@ -15,6 +15,10 @@ void advance(Parser *p) {
 	p->pos++;
 }
 
+void previous(Parser *p) {
+	p->pos--;
+}
+
 // harcore expect
 static void expect(Parser *p, TokenType type, char* errMessage) {
 	if(current(p)->type != type) {
@@ -60,8 +64,6 @@ ASTNode *parse_program(Parser *p) {
 	return progNode;
 }
 
-
-
 ASTNode *parse_statement(Parser *p) {
 	ASTNode *node = parse_assignment(p);
 	if(node != NULL) {
@@ -72,6 +74,15 @@ ASTNode *parse_statement(Parser *p) {
 	node = parse_print(p);
 	if(node != NULL) {
 		expect(p, TOKEN_EOL, "Incorrect syntax no EOL used.");
+		return node;
+	}
+
+	node = parse_ifelse(p);
+	if(node != NULL) {
+		if(strcmp(current(p)->value, "end") != 0) {
+			fprintf(stderr, "Incorrect syntax no 'end' used.\n");
+			exit(1);
+		}
 		return node;
 	}
 
@@ -132,6 +143,9 @@ ASTNode *parse_arithmetic(Parser *p) {
 
 	ASTNode *node = malloc(sizeof(ASTNode));
 
+	expect(p, TOKEN_OPERATOR, "Expected an operator in the expression.");
+	previous(p);
+
 	switch(current(p)->value[0]) {
 		case '+': node->type = NODE_PLUS; break;
 		case '-': node->type = NODE_MINUS; break;
@@ -141,8 +155,6 @@ ASTNode *parse_arithmetic(Parser *p) {
 			fprintf(stderr, "Unexpected behaviour.\n");
 			exit(1);
 	}
-
-	expect(p, TOKEN_OPERATOR, "Expected an operator in the expression.");
 
 	ASTNode *right = parse_arithmetic(p);
 
@@ -191,6 +203,74 @@ ASTNode *parse_print(Parser *p) {
 	return NULL;
 }
 
+ASTNode *parse_ifStatements(Parser *p) {
+	ASTNode *progNode = malloc(sizeof(ASTNode));
+	progNode->type = NODE_IF;
+
+	size_t *capacity = &progNode->program.capacity;
+	size_t *count = &progNode->program.count;
+
+	*capacity = 10;
+	*count = 0;
+
+	progNode->program.statements = malloc(sizeof(ASTNode*)*(*capacity));
+
+	while(strcmp(current(p)->value, "end") != 0) {
+		ASTNode *node = parse_statement(p);
+
+		if(node != NULL) {
+			progNode->program.statements[*count] = node;
+			(*count)++;
+		}
+
+		if(*count >= *capacity) {
+			*capacity*=2;
+			progNode->program.statements = 
+					realloc(progNode->program.statements, 
+						sizeof(ASTNode*)*(*capacity));
+		}
+	}
+
+	if(current(p)->type == TOKEN_EOF) {
+		progNode->program.statements[*count] = NULL;
+	}
+
+	return progNode;
+	return NULL;
+}
+
+ASTNode *parse_ifelse(Parser *p) {
+	if(current(p)->type == TOKEN_KEYWORD && (strcmp(current(p)->value, "if") == 0)) {
+		ASTNode *node = malloc(sizeof(ASTNode));
+		node->type = NODE_IF;
+
+		advance(p);
+
+		ASTNode *leftExpr = parse_expression(p);
+
+		advance(p);
+
+		if(current(p)->type == TOKEN_LOGICALOP) {
+			if(strcmp(current(p)->value, "==") == 0) {
+				
+			} else if(strcmp(current(p)->value, ">") == 0) {
+
+			} else if(strcmp(current(p)->value, "<") == 0) {
+
+			} else if(strcmp(current(p)->value, "~=") == 0) {
+
+			}
+
+		} else {
+			node->ifelse.condition = leftExpr;
+		}
+
+
+	}
+
+	return NULL;
+}
+
 void clean_ASTs(ASTNode *node) {
 	if(node->type == NODE_PROGRAM) {
 		size_t pos = 0;
@@ -208,6 +288,11 @@ void clean_ASTs(ASTNode *node) {
 
 	} else if(node->type == NODE_PRINT) {
 		clean_ASTs(node->print.expr);
+		free(node);
+	} else if(node->type == NODE_IF) {
+		clean_ASTs(node->ifelse.condition);
+		clean_ASTs(node->ifelse.ifBody);
+		clean_ASTs(node->ifelse.elseBody);
 		free(node);
 
 	} else if(node->type == NODE_PLUS || node->type == NODE_MINUS ||
@@ -228,13 +313,13 @@ void clean_ASTs(ASTNode *node) {
 	}
 }
 
-static bool last_level[256];
+static bool last_level[8];
 static void print_indent(int indent) {
     for(int i = 0; i < indent; i++) {
         if(last_level[i]) {
         	printf("    ");
         } else {
-        	printf("│   ");
+        	printf("|   ");
         }
     }
 }
@@ -272,11 +357,24 @@ void print_ASTs(ASTNode *node, int indent, bool isLast) {
 		printf("Print\n");
 
 		print_ASTs(node->print.expr, indent+1, true);
+
+	} else if(node->type == NODE_IF) {
+		printf("If\n");
+
+		print_ASTs(node->ifelse.condition, indent+1, false);
+		if(node->ifelse.elseBody == NULL) {
+			print_ASTs(node->ifelse.ifBody, indent+1, true);
+		} else {
+			print_ASTs(node->ifelse.ifBody, indent+1, false);
+			print_ASTs(node->ifelse.elseBody, indent+1, true);
+		}
+
 	} else if(node->type == NODE_PLUS) {
    		printf("Plus\n");
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
+
 	} else if(node->type == NODE_MINUS) {
    		printf("Minus\n");
 
@@ -294,6 +392,7 @@ void print_ASTs(ASTNode *node, int indent, bool isLast) {
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
+
 	} else if(node->type == NODE_INT) {
 		printf("%s\n", node->value);
 

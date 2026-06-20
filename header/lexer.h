@@ -12,7 +12,7 @@ typedef enum TokenType {
 	TOKEN_OPERATOR, // * + - /
 	TOKEN_LOGICALOP, // == > < !=
 	TOKEN_IDENTIFIER,  //abc
-	TOKEN_KEYWORD, // if else end
+	TOKEN_KEYWORD, // if else end print
 	TOKEN_EOL, //; end of line
 	TOKEN_SOC, //: start of block
 	TOKEN_EOF, //NULL

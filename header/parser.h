@@ -43,8 +43,14 @@ typedef enum NodeType {
 	NODE_DIVIDE,
 	NODE_MINUS,
 
+	NODE_EQUALSTO,
+	NODE_GREATERTHAN,
+	NODE_SMALLERTHAN,
+	NODE_NOTEQUALSTO,
+
 	NODE_ASSIGNMENT,
 	NODE_PRINT,
+	NODE_IF,
 } NodeType;
 
 typedef struct ASTNode {
@@ -70,6 +76,12 @@ typedef struct ASTNode {
 		struct {
 			ASTNode *expr;
 		} print;
+
+		struct {
+			ASTNode *condition;
+			ASTNode *ifBody;
+			ASTNode *elseBody;
+		} ifelse;
 	};
 
 	char *value;
@@ -86,6 +98,8 @@ ASTNode *parse_assignment(Parser *p);
 ASTNode *parse_print(Parser *p);
 
 ASTNode *parse_ifelse(Parser *p);
+ASTNode *parse_ifStatements(Parser *p);
+
 ASTNode *parse_expression(Parser *p);
 ASTNode *parse_arithmetic(Parser *p);
 

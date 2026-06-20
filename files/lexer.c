@@ -18,14 +18,15 @@ static int is_keyword(char *buffer) {
 static int is_operator(char* buffer) {
 	return strcmp(buffer, "+") == 0 ||
 		   strcmp(buffer, "-") == 0 ||
-		   strcmp(buffer, "*") == 0;
+		   strcmp(buffer, "*") == 0 ||
+		   strcmp(buffer, "/") == 0;
 }
 
 static int is_logicalop(char* buffer) {
 	return strcmp(buffer, "==") == 0 ||
 		   strcmp(buffer, ">") == 0 ||
 		   strcmp(buffer, "<") == 0 ||
-		   strcmp(buffer, "!=") == 0;
+		   strcmp(buffer, "~=") == 0;
 }
 
 static bool is_int(char *input, size_t len) {
