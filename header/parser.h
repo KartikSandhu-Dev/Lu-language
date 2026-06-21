@@ -33,6 +33,7 @@ typedef struct Parser {
 
 typedef enum NodeType {
 	NODE_PROGRAM,
+	NODE_BLOCK,
 
 	NODE_INT,
 	NODE_STRING,
@@ -45,7 +46,7 @@ typedef enum NodeType {
 
 	NODE_EQUALSTO,
 	NODE_GREATERTHAN,
-	NODE_SMALLERTHAN,
+	NODE_LESSERTHAN,
 	NODE_NOTEQUALSTO,
 
 	NODE_ASSIGNMENT,

@@ -2,8 +2,12 @@ x = ((5 + 5) * 2);
 
 print x;
 
+y = "hello";
+
 print (2 * 2);
 
 if x > 5:
 	print x;
+else:
+	print y;
 end
