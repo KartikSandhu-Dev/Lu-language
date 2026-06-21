@@ -16,11 +16,12 @@ int main() {
 	Parser p = {tokens, 0};
 	ASTNode *tree = parse_program(&p);
 
+	clean_tokens();
+
 	printf("----------TREE--------------\n");
 	print_ASTs(tree, 0, true);
 
 	clean_ASTs(tree);
-	clean_tokens();
 
 	return 0;
 }

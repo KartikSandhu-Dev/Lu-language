@@ -174,19 +174,19 @@ Token *tokenize(char *buffer) {
 			tok.type = TOKEN_STRING;
 			tok.value = strip_quotes(input[pos], len);
 
-		} else if(input[pos][0] == ';') {
+		} else if(strcmp(input[pos], ";") == 0) {
 			tok.type = TOKEN_EOL;
 
-		} else if(input[pos][0] == ':') {
+		} else if(strcmp(input[pos], ":") == 0) {
 			tok.type = TOKEN_SOC;
 
-		} else if(input[pos][0] == '=') {
+		} else if(strcmp(input[pos], "=") == 0) {
 			tok.type = TOKEN_ASSIGNMENT;
 
-		} else if(input[pos][0] == '(') {
+		} else if(strcmp(input[pos], "(") == 0) {
 			tok.type = TOKEN_LPARANTHES;
 
-		} else if(input[pos][0] == ')') {
+		} else if(strcmp(input[pos], ")") == 0) {
 			tok.type = TOKEN_RPARANTHES;
 
 		} else if(is_operator(input[pos])) {

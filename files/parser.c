@@ -57,6 +57,11 @@ ASTNode *parse_program(Parser *p) {
 		}
 	}
 
+	if(*count >= *capacity) {
+			progNode->program.statements =
+					realloc(progNode->program.statements, 
+						sizeof(ASTNode*)*(*capacity + 1));
+		}
 
 	progNode->program.statements[*count] = NULL;
 
@@ -94,7 +99,7 @@ ASTNode *parse_assignment(Parser *p) {
 	if(current(p)->type == TOKEN_IDENTIFIER) {
 		ASTNode *id = malloc(sizeof(ASTNode));
 		id->type = NODE_IDENTIFIER;
-		id->value = current(p)->value;
+		id->value = strdup(current(p)->value);
 
 		advance(p);
 		expect(p, TOKEN_ASSIGNMENT, "Expected assignment.");
@@ -126,7 +131,7 @@ ASTNode *parse_arithmetic(Parser *p) {
 			node->type = NODE_IDENTIFIER;
 		}
 
-		node->value = current(p)->value;
+		node->value = strdup(current(p)->value);
 		advance(p);
 		return node;
 
@@ -164,7 +169,7 @@ ASTNode *parse_expression(Parser *p) {
 	if(current(p)->type == TOKEN_STRING) {
 	    ASTNode *node = malloc(sizeof(ASTNode));
 	    node->type = NODE_STRING;
-	    node->value = current(p)->value;
+	    node->value = strdup(current(p)->value);
 	    advance(p);
 	    return node;
 	}
@@ -226,10 +231,11 @@ ASTNode *parse_ifStatements(Parser *p) {
 		}
 	}
 
-	if(current(p)->type == TOKEN_EOL) {
-		fprintf(stderr, "Expected an 'end' after the if statemtn.\n");
-		exit(1);
-	}
+	if(*count >= *capacity) {
+			progNode->program.statements =
+					realloc(progNode->program.statements, 
+						sizeof(ASTNode*)*(*capacity + 1));
+		}
 
 	progNode->program.statements[*count] = NULL;
 
@@ -248,7 +254,6 @@ ASTNode *parse_ifelse(Parser *p) {
 
 		ASTNode *leftExpr = parse_expression(p);
 		ASTNode *logicNode = NULL;
-		ASTNode *rightExpr = NULL;
 
 		if(current(p)->type == TOKEN_LOGICALOP) {
 			logicNode = malloc(sizeof(ASTNode));
@@ -268,10 +273,8 @@ ASTNode *parse_ifelse(Parser *p) {
 
 			advance(p);
 
-			rightExpr = parse_expression(p);
-
 			logicNode->expression.left = leftExpr;
-			logicNode->expression.right = rightExpr;
+			logicNode->expression.right = parse_expression(p);
 
 			node->ifelse.condition = logicNode;
 

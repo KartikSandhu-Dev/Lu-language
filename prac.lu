@@ -6,7 +6,10 @@ y = "hello";
 
 print (2 * 2);
 
-if x > 5:
+if x == 5:
+	if x > 10:
+		y = "world";
+	end
 	print x;
 else:
 	print y;
