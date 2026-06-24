@@ -99,14 +99,13 @@ ASTNode *parse_assignment(Parser *p) {
 	if(current(p)->type == TOKEN_IDENTIFIER) {
 		ASTNode *id = malloc(sizeof(ASTNode));
 		id->type = NODE_IDENTIFIER;
-		id->value = strdup(current(p)->value);
+		id->identifier_value = strdup(current(p)->value);
 
 		advance(p);
 		expect(p, TOKEN_ASSIGNMENT, "Expected assignment.");
 
 		ASTNode *node = malloc(sizeof(ASTNode));
 		node->type = NODE_ASSIGNMENT;
-		node->value = NULL;
 
 		ASTNode *expr = parse_expression(p);
 
@@ -127,11 +126,12 @@ ASTNode *parse_arithmetic(Parser *p) {
 
 		if(current(p)->type == TOKEN_INT){
 			node->type = NODE_INT;
+			node->int_value = atoi(current(p)->value);
 		} else if(current(p)->type == TOKEN_IDENTIFIER) {
 			node->type = NODE_IDENTIFIER;
+			node->identifier_value = strdup(current(p)->value);
 		}
 
-		node->value = strdup(current(p)->value);
 		advance(p);
 		return node;
 
@@ -169,7 +169,7 @@ ASTNode *parse_expression(Parser *p) {
 	if(current(p)->type == TOKEN_STRING) {
 	    ASTNode *node = malloc(sizeof(ASTNode));
 	    node->type = NODE_STRING;
-	    node->value = strdup(current(p)->value);
+	    node->string_value = strdup(current(p)->value);
 	    advance(p);
 	    return node;
 	}
@@ -190,7 +190,6 @@ ASTNode *parse_print(Parser *p) {
 
 	   	ASTNode *node = malloc(sizeof(ASTNode));
 		node->type = NODE_PRINT;
-		node->value = NULL;
 
 		ASTNode *expr = parse_expression(p);
 
@@ -202,7 +201,7 @@ ASTNode *parse_print(Parser *p) {
 	return NULL;
 }
 
-ASTNode *parse_ifStatements(Parser *p) {
+ASTNode *parse_ifstatements(Parser *p) {
 	ASTNode *progNode = malloc(sizeof(ASTNode));
 	progNode->type = NODE_BLOCK;
 
@@ -259,13 +258,13 @@ ASTNode *parse_ifelse(Parser *p) {
 			logicNode = malloc(sizeof(ASTNode));
 
 			if(strcmp(current(p)->value, "==") == 0) {
-				logicNode->type = NODE_EQUALSTO;
+				logicNode->type = NODE_EQUALS;
 			} else if(strcmp(current(p)->value, ">") == 0) {
-				logicNode->type = NODE_GREATERTHAN;
+				logicNode->type = NODE_GREATTHAN;
 			} else if(strcmp(current(p)->value, "<") == 0) {
-				logicNode->type = NODE_LESSERTHAN;
+				logicNode->type = NODE_LESSTHAN;
 			} else if(strcmp(current(p)->value, "~=") == 0) {
-				logicNode->type = NODE_NOTEQUALSTO;
+				logicNode->type = NODE_NOTEQUALS;
 			} else {
  				fprintf(stderr, "Unknown logical operator '%s'\n", current(p)->value);
   				exit(1);
@@ -284,12 +283,12 @@ ASTNode *parse_ifelse(Parser *p) {
 
 		expect(p, TOKEN_SOC, "No start of condition initalised.");
 
-		node->ifelse.ifBody = parse_ifStatements(p);
+		node->ifelse.ifBody = parse_ifstatements(p);
 
 		if(strcmp(current(p)->value, "else") == 0) {
 			advance(p);
 			expect(p, TOKEN_SOC, "No start of condition initalised.");
-			node->ifelse.elseBody = parse_ifStatements(p);
+			node->ifelse.elseBody = parse_ifstatements(p);
 		}
 
 		if(strcmp(current(p)->value, "end") == 0) {
@@ -333,8 +332,8 @@ void clean_ASTs(ASTNode *node) {
   	  	clean_ASTs(node->expression.left);
    		clean_ASTs(node->expression.right);
    		free(node);
-	} else if(node->type == NODE_EQUALSTO || node->type == NODE_NOTEQUALSTO ||
-		node->type == NODE_GREATERTHAN || node->type == NODE_LESSERTHAN) {
+	} else if(node->type == NODE_EQUALS || node->type == NODE_NOTEQUALS ||
+		node->type == NODE_GREATTHAN || node->type == NODE_LESSTHAN) {
   	  	clean_ASTs(node->expression.left);
    		clean_ASTs(node->expression.right);
    		free(node);
@@ -343,9 +342,11 @@ void clean_ASTs(ASTNode *node) {
 		free(node);
 
 	} else if(node->type == NODE_STRING) {
+		free(node->string_value);
 		free(node);
 
 	} else if(node->type == NODE_IDENTIFIER) {
+		free(node->identifier_value);
 		free(node);
 
 	}
@@ -443,38 +444,38 @@ void print_ASTs(ASTNode *node, int indent, bool isLast) {
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
 
-	} else if(node->type == NODE_EQUALSTO) {
-   		printf("EqualsTo\n");
+	} else if(node->type == NODE_EQUALS) {
+   		printf("Equals\n");
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
 
-	} else if(node->type == NODE_NOTEQUALSTO) {
-   		printf("NotEqualsTo\n");
+	} else if(node->type == NODE_NOTEQUALS) {
+   		printf("NotEquals\n");
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
 
-	} else if(node->type == NODE_GREATERTHAN) {
-   		printf("GreaterThan\n");
+	} else if(node->type == NODE_GREATTHAN) {
+   		printf("GreatThan\n");
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
 
-	} else if(node->type == NODE_LESSERTHAN) {
-   		printf("LesserThan\n");
+	} else if(node->type == NODE_LESSTHAN) {
+   		printf("LessThan\n");
 
   	  	print_ASTs(node->expression.left, indent+1, false);
    		print_ASTs(node->expression.right, indent+1, true);
 
 	} else if(node->type == NODE_INT) {
-		printf("%s\n", node->value);
+		printf("%d\n", node->int_value);
 
 	} else if(node->type == NODE_STRING) {
-		printf("%s\n", node->value);
+		printf("%s\n", node->string_value);
 
 	} else if(node->type == NODE_IDENTIFIER) {
-		printf("%s\n", node->value);
+		printf("%s\n", node->identifier_value);
 
 	}
 
