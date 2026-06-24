@@ -1,15 +1,27 @@
 CC = gcc
-CFLAGS = -Iheader -Wall
+CFLAGS = -Wall -Wextra -Ilexer -Iparser
 
-SRC = $(wildcard *.c files/*.c)
+SRC = main.c \
+      lexer/lexer.c \
+      parser/parser.c
+
 OBJ = $(SRC:.c=.o)
 
-main: $(OBJ)
-	$(CC) $(OBJ) -o main
+TARGET = compiler
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+run: $(TARGET)
+	@./$(TARGET) prac.lu
+
 clean:
-	@rm -f $(OBJ) main
 	@echo "CLEANED"
+	@rm -f $(OBJ) $(TARGET)
+
+.PHONY: all run clean

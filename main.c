@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "header/lexer.h"
-#include "header/parser.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 
 char *read_whole_file(char *name);
 
-int main() {
-	char *buffer = read_whole_file("prac.lu");
+int main(int argc, char *argv[]) {
+	(void)argc;
+	char *buffer = read_whole_file(argv[1]);
 
 	Token *tokens = tokenize(buffer);
 

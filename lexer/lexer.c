@@ -1,4 +1,4 @@
-#include "../header/lexer.h"
+#include "lexer.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,7 @@ static bool is_int(char *input, size_t len) {
 	if(len == 0) { return false; }
 
 	bool is_int = true;
-	for(int i = 0; len > i; i++) {
+	for(size_t i = 0; len > i; i++) {
 		if(!(isdigit(input[i]))) {
 			is_int = false;
 			return is_int;
