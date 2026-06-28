@@ -1,9 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Ilexer -Iparser
+CFLAGS = -Wall -Wextra -Ilexer -Iparser -I./include
 
-SRC = main.c \
-      lexer/lexer.c \
-      parser/parser.c
+SRC = src/main.c \
+      src/lexer.c \
+      src/parser.c \
+      src/vm/vm.c \
+      src/vm/bytecode.c \
+      src/vm/instruction.c \
+      src/vm/stack.c
 
 OBJ = $(SRC:.c=.o)
 

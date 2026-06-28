@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "../lexer/lexer.h"
+#include "lexer.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

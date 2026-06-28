@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "lexer/lexer.h"
-#include "parser/parser.h"
+#include "lexer.h"
+#include "parser.h"
 
 char *read_whole_file(char *name);
 
@@ -23,6 +23,14 @@ int main(int argc, char *argv[]) {
 	print_ASTs(tree, 0, true);
 
 	clean_ASTs(tree);
+
+	// char *filepath = argv[1];
+	// (void)argc;
+
+	// VM vm;
+	// vm_init(&vm, filepath);
+
+	// vm_run(&vm);
 
 	return 0;
 }
