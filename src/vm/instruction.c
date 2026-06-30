@@ -38,10 +38,12 @@ void dump_compiled(VM *vm) {
 		OpCode opcode = vm->program[pos].opcode;
 		Value val = vm->program[pos].value;
 
-		if(val.type == INTEGER) {
-			fprintf(file, "%s %d\n", opcode_to_string(opcode), val.int_value);
-		} else if(val.type == STRING) {
-			fprintf(file, "%s %s\n", opcode_to_string(opcode), val.string_value);
+		if(needs_input(opcode)) {
+			if(val.type == INTEGER) {
+				fprintf(file, "%s %d\n", opcode_to_string(opcode), val.int_value);
+			} else if(val.type == STRING) {
+				fprintf(file, "%s %s\n", opcode_to_string(opcode), val.string_value);
+			}
 		} else {
 			fprintf(file, "%s\n", opcode_to_string(opcode));
 		}
