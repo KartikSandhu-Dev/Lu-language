@@ -2,6 +2,7 @@
 #define VM_H
 
 #include "bytecode.h"
+#include "parser.h"
 
 #define STACK_SIZE 1024
 #define PROGRAM_SIZE 1024
@@ -19,7 +20,7 @@ typedef struct VM {
 	int ip; // instruction pointer
 } VM;
 
-void vm_init(VM *vm, char *filepath);
+void vm_init(VM *vm, ASTNode *program_node);
 void vm_run(VM *vm);
 
 #endif

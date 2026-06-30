@@ -1,9 +1,12 @@
-#ifndef LEXER_H
-#define LEXER_H
+#ifndef INSTRUCTION_H
+#define INSTRUCTION_H
 
-#include <stdlib.h>
 #include "vm.h"
+#include "vm/bytecode.h"
 
-void fill_instructions(VM *vm, char *filepath);
+size_t emit(VM *vm, OpCode opcode);
+size_t emit_value(VM *vm, OpCode opcode, Value val);
+
+void dump_compiled(VM *vm);
 
 #endif

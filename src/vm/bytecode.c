@@ -1,29 +1,55 @@
 #include "vm/bytecode.h"
 #include <string.h>
 
-OpCode opcode_from_str(char *name) {
-    if (strcmp(name, "PUSH") == 0) return PUSH;
-    if (strcmp(name, "POP") == 0) return POP;
-
-    if (strcmp(name, "LOAD") == 0) return LOAD;
-    if (strcmp(name, "STORE") == 0) return STORE;
-
-    if (strcmp(name, "ADD") == 0) return ADD;
-    if (strcmp(name, "SUB") == 0) return SUB;
-    if (strcmp(name, "MUL") == 0) return MUL;
-    if (strcmp(name, "DIV") == 0) return DIV;
-
-    if (strcmp(name, "EQ") == 0) return EQ;
-    if (strcmp(name, "GT") == 0) return GT;
-    if (strcmp(name, "LT") == 0) return LT;
-
-    if (strcmp(name, "JUMP") == 0) return JUMP;
-    if (strcmp(name, "JUMP_IF_FALSE") == 0) return JUMP_IF_FALSE;
-
-    if (strcmp(name, "PRINT") == 0) return PRINT;
-    if (strcmp(name, "HALT") == 0) return HALT;
-
-    return -1;
+char *opcode_to_string(OpCode opcode) {
+    switch (opcode) {
+        case PUSH:
+            return "PUSH";
+            break;
+        case POP:
+            return "POP";
+            break;
+        case LOAD:
+            return "LOAD";
+            break;
+        case STORE:
+            return "STORE";
+            break;
+        case ADD:
+            return "ADD";
+            break;
+        case SUB:
+            return "SUB";
+            break;
+        case MUL:
+            return "MUL";
+            break;
+        case DIV:
+            return "DIV";
+            break;
+        case EQ:
+            return "EQ";
+            break;
+        case GT:
+            return "GT";
+            break;
+        case LT:
+            return "LT";
+            break;
+        case PRINT:
+            return "PRINT";
+            break;
+        case JUMP:
+            return "JUMP";
+            break;
+        case JUMP_IF_FALSE:
+            return "JUMP_IF_FALSE";
+            break;
+        case HALT:
+            return "HALT";
+            break;
+    }
+    return "NULL";
 }
 
 size_t needs_input(OpCode opcode) {

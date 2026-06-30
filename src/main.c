@@ -1,60 +1,28 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "lexer.h"
 #include "parser.h"
+#include "vm/vm.h"
 
 char *read_whole_file(char *name);
 
 int main(int argc, char *argv[]) {
 	(void)argc;
-	char *buffer = read_whole_file(argv[1]);
+	//------------lexer--------------
+	Token *tokens = tokenize(argv[1]);
 
-	Token *tokens = tokenize(buffer);
-
-		printf("----------TOKENS--------------\n");
-	display_tokens(tokens);
-
+	//------------parser--------------
 	Parser p = {tokens, 0};
 	ASTNode *tree = parse_program(&p);
 
+	// print_ASTs(tree, 0, true);
+	// printf("\n");
+	//------------vm|execution--------------
+	VM vm;
+	vm_init(&vm, tree);
+	vm_run(&vm);
+
+	//------------cleanup--------------
 	clean_tokens();
-
-	printf("----------TREE--------------\n");
-	print_ASTs(tree, 0, true);
-
 	clean_ASTs(tree);
 
-	// char *filepath = argv[1];
-	// (void)argc;
-
-	// VM vm;
-	// vm_init(&vm, filepath);
-
-	// vm_run(&vm);
-
 	return 0;
-}
-
-char *read_whole_file(char *name) {
-	FILE *file;
-
-	file = fopen(name, "r");
-
-	if(!file) {
-		fprintf(stderr, "FILE IS EMPTY!\n");
-		exit(1);
-	}
-
-	fseek(file, 0, SEEK_END);
-	int size = ftell(file);
-	rewind(file);
-
-	char *buffer = malloc(sizeof(char)*(size+1));
-	fread(buffer, 1, size, file);
-
-	buffer[size] = '\0';
-
-	fclose(file);
-
-	return buffer;
 }

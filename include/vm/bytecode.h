@@ -47,7 +47,7 @@ typedef struct Instruction {
 	Value value;
 } Instruction;
 
-OpCode opcode_from_str(char *name);
+char *opcode_to_string(OpCode opcode);
 size_t needs_input(OpCode opcode);
 
 #endif

@@ -1,13 +1,16 @@
 #include "vm/vm.h"
+#include "parser.h"
 #include "vm/instruction.h"
 #include "vm/stack.h"
+#include "compiler.h"
 
-void vm_init(VM *vm, char *filepath) {
+void vm_init(VM *vm, ASTNode *program_node) {
 	vm->code_size = 0;
 	vm->sp = 0;
 	vm->ip = 0;
 
-	fill_instructions(vm, filepath);
+	compile(vm, program_node);
+	dump_compiled(vm);
 }
 
 void vm_run(VM *vm) {

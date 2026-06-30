@@ -146,7 +146,33 @@ static char *strip_quotes(char *input, size_t len) {
 	return out;
 }
 
-Token *tokenize(char *buffer) {
+char *read_whole_file(char *name) {
+	FILE *file;
+
+	file = fopen(name, "r");
+
+	if(!file) {
+		fprintf(stderr, "FILE IS EMPTY!\n");
+		exit(1);
+	}
+
+	fseek(file, 0, SEEK_END);
+	int size = ftell(file);
+	rewind(file);
+
+	char *buffer = malloc(sizeof(char)*(size+1));
+	fread(buffer, 1, size, file);
+
+	buffer[size] = '\0';
+
+	fclose(file);
+
+	return buffer;
+}
+
+Token *tokenize(char *filepath) {
+	char *buffer = read_whole_file(filepath);
+	
 	char **input = split(buffer);
 	size_t pos = 0;
 	size_t size = strlen(buffer);

@@ -1,16 +1,11 @@
-x = ((5 + 5) * 2);
-
+x = "hello world";
 print x;
 
-y = "hello";
+y = 5;
+z = 10;
 
-print (2 * 2);
+xyz = (y + z);
 
-if x == 5:
-	if x > 10:
-		y = "world";
-	end
-	print x;
-else:
-	print y;
-end
+print xyz;
+
+print (2 * (5 + 5));
