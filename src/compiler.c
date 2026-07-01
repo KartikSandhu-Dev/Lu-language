@@ -187,8 +187,16 @@ void compile_expr(VM *vm, ASTNode *node) {
         	emit(vm, LT);
         	break;
 
+        case NODE_INT:
+        	compile_literal(vm, node);
+        	break;
+
+        case NODE_IDENTIFIER:
+        	compile_identifier(vm, node);
+        	break;
+
        	default:
-       		fprintf(stderr, "Bad syntax\n");
+       		fprintf(stderr, "Bad syntax in compilation\n");
        		exit(1);
        		break;
     }

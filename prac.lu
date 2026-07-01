@@ -1,17 +1,76 @@
-x = "hello world";
-print x;
+a = 1;
+b = 2;
+c = 3;
 
-y = 5;
-z = 10;
+print a;
+print b;
+print c;
 
-xyz = (y + z);
+sum = ((a + b) + c);
+diff = (c - a);
+mul = ((a * b) * c);
+complex = ((a + b) * (c + 2));
 
-print xyz;
+print sum;
+print diff;
+print mul;
+print complex;
 
-print (2 * (5 + 5));
+s1 = "foo";
+s2 = "bar";
+s3 = s1;
 
-if "paki" == "pakii":
-	print "if";
+print s1;
+print s2;
+print s3;
+
+x = 10;
+y = 0;
+
+if x:
+	print "x is truthy";
+
+	if y:
+		print "y is truthy (should not print)";
+	else:
+		print "y is falsy";
+	end
+
 else:
-	print "else";
+	print "x is falsy (should not print)";
 end
+
+
+if "hello" == "hello":
+	print "strings match correctly";
+else:
+	print "string compare failed";
+end
+
+cond = (a + b);
+
+if cond > c:
+	print "a+b == c works";
+else:
+	print "math logic broken";
+end
+
+if 1:
+	if 2:
+		if 3:
+			print "deep nesting works";
+		end
+	end
+end
+
+zero = 0;
+neg = -5;
+big = 9999;
+
+print zero;
+print neg;
+print big;
+
+print ((big + neg) + zero);
+
+print "test complete";

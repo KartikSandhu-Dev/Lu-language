@@ -32,8 +32,14 @@ static int is_logicalop(char* buffer) {
 static bool is_int(char *input, size_t len) {
 	if(len == 0) { return false; }
 
+	size_t start = 0;
+	if(input[start] == '-') {
+		if(len == 1) { return false; }
+		start = 1;
+	}
+
 	bool is_int = true;
-	for(size_t i = 0; len > i; i++) {
+	for(size_t i = start; len > i; i++) {
 		if(!(isdigit(input[i]))) {
 			is_int = false;
 			return is_int;
@@ -50,6 +56,15 @@ static bool is_string(char *input, size_t len) {
 		return true;
 	}
 
+	return false;
+}
+
+static bool is_identifier(char *input, size_t len) {
+	if(len == 0) { return false; }
+
+	if(isalpha(input[0])) {
+		return true; 
+	} 
 	return false;
 }
 
@@ -224,7 +239,7 @@ Token *tokenize(char *filepath) {
 		} else if(is_keyword(input[pos])) {
 			tok.type = TOKEN_KEYWORD;
 
-		} else if(!(is_keyword(input[pos]))) {
+		} else if(!(is_keyword(input[pos])) && is_identifier(input[pos], len)) {
 			tok.type = TOKEN_IDENTIFIER;
 
 		} else {

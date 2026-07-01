@@ -13,8 +13,6 @@ int main(int argc, char *argv[]) {
 	Parser p = {tokens, 0};
 	ASTNode *tree = parse_program(&p);
 
-	// print_ASTs(tree, 0, true);
-	// printf("\n");
 	//------------vm|execution--------------
 	VM vm;
 	vm_init(&vm, tree);
