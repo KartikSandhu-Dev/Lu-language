@@ -1,5 +1,7 @@
 #include "vm/stack.h"
+#include "vm/bytecode.h"
 #include <stdio.h>
+#include <string.h>
 
 void push(VM *vm, Value value) {
 	if(vm->sp >= STACK_SIZE) {
@@ -100,8 +102,8 @@ void eq(VM *vm) {
 		push(vm, v3);
 	} else if(lhs.type == STRING && rhs.type == STRING) {
 		Value v3 = {0};
-		v3.type = STRING;
-		v3.int_value = lhs.int_value == rhs.int_value;
+		v3.type = INTEGER;
+		v3.int_value = strcmp(lhs.string_value, rhs.string_value);
 		push(vm, v3);
 	} else {
 		fprintf(stderr, "EQ needs 2 integers in the stack\n");

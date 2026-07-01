@@ -10,7 +10,7 @@ print xyz;
 
 print (2 * (5 + 5));
 
-if 10 == 10:
+if "paki" == "pakii":
 	print "if";
 else:
 	print "else";

@@ -212,10 +212,10 @@ void compile_ifelse(VM *vm, ASTNode *node) {
 
 	compile_block(vm, node->ifelse.ifBody);
 
-	patch_jump(vm, instruction_false);
-
 	Value val_true = make_int(0);
 	size_t instruction_true = emit_value(vm, JUMP, val_true);
+
+	patch_jump(vm, instruction_false);
 
 	compile_block(vm, node->ifelse.elseBody);
 	patch_jump(vm, instruction_true);
