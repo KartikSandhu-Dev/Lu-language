@@ -88,7 +88,16 @@ void compile_node(VM *vm, ASTNode *node) {
 
 }
 
+Value make_int(int val) {
+	Value v = {0};
+	v.type = INTEGER;
+	v.int_value = val;
+	return v;
+}
+
 void compile_block(VM *vm, ASTNode *node) {
+	if(!node) { return; }
+
 	size_t pos = 0;
 	while(node->program.statements[pos] != NULL) {
 		compile_node(vm, node->program.statements[pos]);
@@ -139,9 +148,7 @@ void compile_assignment(VM *vm, ASTNode *node) {
 		slot = add_var(&symbol_table, node->assignment.target->identifier_value);
 	}
 
-	Value val = {0};
-	val.type = INTEGER;
-	val.int_value = slot;
+	Value val = make_int(slot);
 
 	emit_value(vm, STORE, val);
 
@@ -193,11 +200,26 @@ void compile_print(VM *vm, ASTNode *node) {
 	emit(vm, PRINT);
 }
 
-void compile_ifelse(VM *vm, ASTNode *node) {
-	compile_block(vm, node->ifelse.ifBody);
-	compile_block(vm, node->ifelse.elseBody);
+void patch_jump(VM *vm, size_t instruction) {
+	vm->program[instruction].value.int_value = vm->code_size + 1;
+}
 
+void compile_ifelse(VM *vm, ASTNode *node) {
 	compile_expr(vm, node->ifelse.condition);
+
+	Value val_false = make_int(0);
+	size_t instruction_false = emit_value(vm, JUMP_IF_FALSE, val_false);
+
+	compile_block(vm, node->ifelse.ifBody);
+
+	patch_jump(vm, instruction_false);
+
+	Value val_true = make_int(0);
+	size_t instruction_true = emit_value(vm, JUMP, val_true);
+
+	compile_block(vm, node->ifelse.elseBody);
+	patch_jump(vm, instruction_true);
+
 }
 
 int add_var(SymbolTable *table, const char *name) {
@@ -224,3 +246,4 @@ int lookup(SymbolTable *table, const char *name) {
 	}
 	return -1;
 }
+
