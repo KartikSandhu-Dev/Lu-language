@@ -103,7 +103,11 @@ void eq(VM *vm) {
 	} else if(lhs.type == STRING && rhs.type == STRING) {
 		Value v3 = {0};
 		v3.type = INTEGER;
-		v3.int_value = strcmp(lhs.string_value, rhs.string_value);
+		if(strcmp(lhs.string_value, rhs.string_value) == 0) {
+			v3.int_value = 1;
+		} else {
+			v3.int_value = 0;
+		}
 		push(vm, v3);
 	} else {
 		fprintf(stderr, "EQ needs 2 integers in the stack\n");
