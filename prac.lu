@@ -49,7 +49,7 @@ end
 
 cond = (a + b);
 
-if cond > c:
+if cond == c:
 	print "a+b == c works";
 else:
 	print "math logic broken";
