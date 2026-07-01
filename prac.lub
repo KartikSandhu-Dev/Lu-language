@@ -123,6 +123,6 @@ ADD
 LOAD 13
 ADD
 PRINT
-PUSH test complete
+PUSH test complete!
 PRINT
 HALT
